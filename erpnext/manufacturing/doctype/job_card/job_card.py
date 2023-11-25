@@ -187,7 +187,33 @@ class JobCard(Document):
 
 		if time_logs and production_capacity > len(time_logs):
 			return {}
-
+		else :
+			#further Grouping of time_logs based on sequential non overlapping Job cards
+			time_logs = sorted(time_logs, key=lambda x: x.get("from_time")) #Sort Jcs based on from_time
+			sequentialjc_list = [[]]
+			temp = time_logs.copy() #temporary copy of time_logs
+			# Run the loop till all elements of time_logs are grouped
+			while len(temp) > 0:
+				seqtemp = [temp[0]['name']]
+				check_to_time = temp[0]['to_time']
+				remove_list = [0]
+				# check to_time with next from_time if they are sequential then to_time <= from_time as they are sorted
+				for idx in range(1,len(temp)):
+					if to_time1 <= temp[i]['from_time']:
+						seqtemp.append(temp[i]['name']) #Making sets by Grouping 
+						to_time1 = temp[i]['to_time'] #Next to_time is latest added jc of that group
+						remove_list.append(i)
+				remove_list.reverse() 
+				#remove elements from temporary copy of time logs whichever are shifted to group.
+				for idx1 in remove_list:
+					temp.pop(j)
+				sequentialjc_list.append(seqtemp)
+			sequentialjc_list.pop(0)
+			#check again with production capacity but now with Group list
+			if sequentialjc_list and production_capacity > len(sequentialjc_list):
+			return {}
+			
+		
 		if self.workstation_type and time_logs:
 			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
 				self.workstation = workstation_time.get("workstation")
